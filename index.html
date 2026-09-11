@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex, nofollow">
+<title>Delivery at volume</title>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+
+<style>
+  /* ============================================================
+     Dark is the committed default. Light is available by toggle.
+     Every colour below is measured against its own ground.
+     ============================================================ */
+  :root{
+    --bg:#0A0B0D;
+    --surface:#14171C;
+    --raised:#1B1F26;
+    --sunk:#060709;
+    --line:#2E343D;
+    --line-soft:#232830;
+
+    --text:#FFFFFF;        /* 19.9 : 1 */
+    --text-2:#DFE5EC;      /* 15.2 : 1 */
+    --muted:#A8B2BF;       /*  9.4 : 1 */
+    --faint:#7E8998;       /*  5.5 : 1 */
+
+    --gold:#F0C53C;        /* 12.2 : 1  brand, their figures */
+    --gold-dim:rgba(240,197,60,.14);
+    --gold-line:rgba(240,197,60,.34);
+
+    --sky:#4CC2FF;         /* 10.0 : 1  the system, process stages */
+    --sky-dim:rgba(76,194,255,.14);
+    --sky-line:rgba(76,194,255,.36);
+
+    --violet:#B48CFF;      /*  7.6 : 1  generation, AI steps */
+    --violet-dim:rgba(180,140,255,.15);
+
+    --pass:#3DDC84;        /* 11.1 : 1  passed, covered */
+    --pass-dim:rgba(61,220,132,.14);
+
+    --fail:#FF5C5C;        /*  6.5 : 1  blocked, gap, lost */
+    --fail-dim:rgba(255,92,92,.14);
+
+    --warn:#FFB020;        /* 10.3 : 1  pressure, alarm */
+    --warn-dim:rgba(255,176,32,.14);
+
+    --font:"Montserrat",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+    --gutter:clamp(18px,4.5vw,64px);
+    --pill:999px;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text-2);
+    font-family:var(--font);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    transition:background .3s ease,color .3s ease;
+  }
+
+  p{margin:0}
+  a{color:inherit}
+
+  h1,h2,h3{
+    margin:0;
+    color:var(--text);
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:-0.035em;
+    line-height:0.94;
+    text-wrap:balance;
+  }
+
+  .wrap{width:100%;max-width:1180px;margin-inline:auto;padding-inline:var(--gutter)}
+
+  .label{
+    font-family:var(--mono);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--sky);
+  }
+
+  .label.gold{color:var(--gold)}
+  .label.fail{color:var(--fail)}
+
+  .eyebrow{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  section{scroll-margin-top:88px}
+  .sec{padding-block:clamp(54px,7vw,96px)}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font-family:var(--font);
+    font-size:11.5px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;
+    padding:14px 26px;border-radius:var(--pill);
+    border:1.5px solid var(--sky);background:var(--sky);color:#04121C;
+    text-decoration:none;cursor:pointer;white-space:nowrap;
+    transition:transform .18s ease,filter .18s ease;
+  }
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--line)}
+  .btn-ghost:hover{border-color:var(--sky);color:var(--sky);background:transparent}
+  .btn-sm{padding:10px 20px;font-size:10.5px}
+
+  :where(a,button,input,select,summary):focus-visible{outline:2px solid var(--sky);outline-offset:3px}
+
+  /* ---------- top bar ---------- */
+
+  .topbar{
+    position:sticky;top:0;z-index:80;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:saturate(150%) blur(16px);
+    border-bottom:1px solid var(--line);
+  }
+
+  .topbar-in{display:flex;align-items:center;gap:18px;min-height:64px}
+
+  .mark{
+    font-size:12.5px;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--text);margin-right:auto;display:flex;align-items:center;gap:11px;
+  }
+  .mark i{width:22px;height:2.5px;background:var(--sky);display:block;font-style:normal}
+
+  .theme-btn{
+    font-family:var(--mono);
+    font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+    padding:9px 16px;border-radius:var(--pill);
+    border:1px solid var(--line);background:transparent;color:var(--muted);
+    cursor:pointer;transition:border-color .18s ease,color .18s ease;
+  }
+  .theme-btn:hover{border-color:var(--sky-line);color:var(--sky)}
+
+  /* ---------- hero ---------- */
+
+  .hero{position:relative;padding-block:clamp(52px,7.5vw,100px) clamp(44px,6vw,76px);overflow:hidden}
+
+  .hero::before{
+    content:"";position:absolute;top:-40%;right:-12%;width:72%;height:160%;
+    background:radial-gradient(closest-side, var(--sky-dim), transparent 70%);
+    pointer-events:none;
+  }
+  .hero::after{
+    content:"";position:absolute;bottom:-50%;left:-10%;width:60%;height:140%;
+    background:radial-gradient(closest-side, var(--violet-dim), transparent 70%);
+    pointer-events:none;
+  }
+
+  .hero .wrap{position:relative}
+
+  .hero h1{font-size:clamp(38px,6.8vw,86px);letter-spacing:-0.045em;line-height:0.9}
+  .hero h1 b{color:var(--warn);font-weight:900}
+
+  .hero-lede{
+    margin-top:28px;max-width:58ch;
+    font-size:clamp(15px,1.45vw,17.5px);
+    color:var(--text-2);line-height:1.66;text-transform:none;
+  }
+
+  .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+
+  /* ---------- the math ---------- */
+
+  .math{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:1px;background:var(--line);border:1px solid var(--line);
+    margin-top:clamp(36px,5vw,56px);
+  }
+
+  .mcell{background:var(--surface);padding:26px 22px 28px;border-top:3px solid transparent}
+  .mcell.src{border-top-color:var(--gold)}
+  .mcell.alarm{background:var(--raised);border-top-color:var(--warn)}
+  .mcell.alarm2{background:var(--raised);border-top-color:var(--fail)}
+
+  .mval{
+    display:block;font-size:clamp(28px,3.8vw,44px);font-weight:900;
+    letter-spacing:-0.04em;line-height:1;font-variant-numeric:tabular-nums;color:var(--text);
+  }
+  .mcell.src .mval{color:var(--gold)}
+  .mcell.alarm .mval{color:var(--warn)}
+  .mcell.alarm2 .mval{color:var(--fail)}
+
+  .mkey{margin-top:12px;font-size:13px;color:var(--text-2);line-height:1.52;text-transform:none}
+
+  .msrc{
+    display:block;margin-top:10px;
+    font-family:var(--mono);font-size:10.5px;font-weight:500;
+    letter-spacing:0.1em;text-transform:uppercase;color:var(--faint);
+  }
+
+  /* ---------- section heads ---------- */
+
+  .sec-head{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
+    gap:clamp(22px,4vw,58px);align-items:end;margin-bottom:clamp(30px,4vw,48px);
+  }
+
+  .sec-head h2{font-size:clamp(26px,3.9vw,46px)}
+  .sec-head p{color:var(--muted);max-width:56ch;font-size:15px;line-height:1.68}
+
+  /* ---------- pain cards ---------- */
+
+  .pains{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+
+  .pain{
+    background:var(--surface);border:1px solid var(--line);
+    border-top:3px solid var(--fail);
+    padding:24px 22px 26px;display:grid;gap:12px;align-content:start;
+  }
+
+  .pain-n{
+    font-family:var(--mono);font-size:11px;font-weight:700;
+    letter-spacing:0.16em;color:var(--fail);
+  }
+
+  .pain h3{font-size:16px;letter-spacing:-0.015em;line-height:1.22}
+  .pain p{font-size:14px;color:var(--muted);line-height:1.62}
+
+  .pain-fix{
+    margin-top:4px;padding-top:14px;border-top:1px solid var(--line-soft);
+    font-size:13.5px;color:var(--text-2);line-height:1.58;display:grid;gap:6px;
+  }
+
+  .pain-fix b{
+    font-family:var(--mono);font-size:10.5px;font-weight:700;
+    letter-spacing:0.14em;text-transform:uppercase;color:var(--pass);
+  }
+
+  /* ---------- console ---------- */
+
+  .console{
+    background:var(--surface);border:1px solid var(--line);
+    display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+  }
+
+  .con-left{padding:26px 24px;border-right:1px solid var(--line)}
+  .con-right{padding:26px 24px;background:var(--sunk)}
+
+  .con-title{
+    font-family:var(--mono);font-size:11px;font-weight:700;
+    letter-spacing:0.16em;text-transform:uppercase;color:var(--sky);margin-bottom:16px;
+  }
+
+  .req{
+    width:100%;text-align:left;background:var(--raised);
+    border:1px solid var(--line);border-left:3px solid var(--line);
+    padding:15px 16px;cursor:pointer;font-family:var(--font);color:var(--text-2);
+    display:grid;gap:8px;transition:border-color .18s ease,background .18s ease;
+  }
+
+  .req + .req{margin-top:9px}
+  .req:hover{border-color:var(--sky-line)}
+  .req.on{border-left-color:var(--sky);background:var(--sky-dim)}
+
+  .req-from{
+    font-family:var(--mono);font-size:10.5px;font-weight:700;
+    letter-spacing:0.12em;text-transform:uppercase;color:var(--sky);
+  }
+
+  .req-txt{font-size:13.5px;color:var(--text-2);line-height:1.55}
+
+  .req-tag{
+    font-family:var(--mono);font-size:10px;font-weight:500;
+    letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);
+  }
+
+  .run-row{display:flex;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap}
+
+  .run-note{
+    font-family:var(--mono);font-size:11px;font-weight:600;
+    letter-spacing:0.08em;color:var(--muted);
+  }
+  .run-note.go{color:var(--sky)}
+  .run-note.bad{color:var(--fail)}
+  .run-note.ok{color:var(--pass)}
+
+  /* stages */
+
+  .stages{display:grid;gap:8px}
+
+  .stage{
+    display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center;
+    padding:13px 14px;background:var(--raised);border:1px solid var(--line-soft);
+    opacity:.5;transition:opacity .3s ease,border-color .3s ease;
+  }
+
+  .stage.live{opacity:1;border-color:var(--sky-line)}
+  .stage.live[data-s="1"]{border-color:var(--violet)}
+  .stage.done{opacity:1}
+
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    border:2px solid var(--faint);justify-self:center;
+    transition:background .3s ease,border-color .3s ease;
+  }
+
+  .stage.live .dot{border-color:var(--sky);background:var(--sky);animation:pulse 1.1s ease-in-out infinite}
+  .stage.live[data-s="1"] .dot{border-color:var(--violet);background:var(--violet)}
+  .stage.done .dot{border-color:var(--pass);background:var(--pass);animation:none}
+
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.6);opacity:.55}}
+  @media (prefers-reduced-motion:reduce){.stage.live .dot{animation:none}}
+
+  .stage-n{font-size:13.5px;font-weight:600;color:var(--text)}
+
+  .stage-t{
+    font-family:var(--mono);font-size:11px;font-weight:600;
+    letter-spacing:0.06em;color:var(--faint);font-variant-numeric:tabular-nums;
+  }
+  .stage.live .stage-t{color:var(--sky)}
+  .stage.done .stage-t{color:var(--pass)}
+
+  /* qa gate */
+
+  .qa-box{
+    margin-top:16px;background:var(--raised);
+    border:1px solid var(--line-soft);padding:16px;min-height:142px;
+  }
+
+  .qa-list{display:grid;gap:8px}
+
+  .qa-row{
+    display:grid;grid-template-columns:16px 1fr auto;gap:11px;align-items:center;
+    font-family:var(--mono);font-size:11.5px;font-weight:500;
+    letter-spacing:0.02em;color:var(--text-2);
+    opacity:0;transform:translateX(-6px);animation:slideIn .3s ease forwards;
+  }
+
+  @keyframes slideIn{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.qa-row{animation:none;opacity:1;transform:none}}
+
+  .tick{
+    width:15px;height:15px;display:grid;place-items:center;
+    font-size:10px;font-weight:700;border-radius:3px;
+  }
+  .tick.ok{background:var(--pass-dim);color:var(--pass)}
+  .tick.no{background:var(--fail-dim);color:var(--fail)}
+
+  .qa-v{font-size:10.5px;font-weight:600;color:var(--muted)}
+  .qa-row.bad{color:var(--fail)}
+  .qa-row.bad .qa-v{color:var(--fail)}
+  .qa-row.good .qa-v{color:var(--pass)}
+
+  .qa-empty{
+    font-family:var(--mono);font-size:11.5px;
+    color:var(--muted);letter-spacing:0.06em;
+  }
+
+  .out{
+    margin-top:16px;padding:16px 17px;
+    border:1px solid var(--line-soft);border-left:3px solid var(--sky);
+    background:var(--raised);display:none;
+  }
+  .out.show{display:block}
+  .out.v{border-left-color:var(--violet)}
+  .out.p{border-left-color:var(--pass)}
+  .out.f{border-left-color:var(--fail)}
+
+  .out-h{
+    font-family:var(--mono);font-size:11px;font-weight:700;
+    letter-spacing:0.14em;text-transform:uppercase;color:var(--sky);margin-bottom:10px;
+  }
+  .out.v .out-h{color:var(--violet)}
+  .out.p .out-h{color:var(--pass)}
+  .out.f .out-h{color:var(--fail)}
+
+  .out p{font-size:13.5px;color:var(--text-2);line-height:1.62}
+
+  .out-meta{
+    margin-top:13px;padding-top:13px;border-top:1px solid var(--line-soft);
+    display:flex;gap:20px;flex-wrap:wrap;
+    font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.06em;color:var(--muted);
+  }
+  .out-meta b{color:var(--pass);font-weight:700}
+
+  /* ---------- waves ---------- */
+
+  .waves{
+    display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);
+    gap:clamp(24px,4vw,52px);align-items:center;
+  }
+
+  .chart{background:var(--surface);border:1px solid var(--line);padding:24px 22px 18px}
+
+  .chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap}
+
+  .lg{
+    display:flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:10.5px;font-weight:600;
+    letter-spacing:0.08em;text-transform:uppercase;color:var(--text-2);
+  }
+  .lg i{width:12px;height:12px;display:block;font-style:normal;border-radius:2px}
+  .lg.demand i{background:var(--sky)}
+  .lg.over i{background:var(--fail)}
+  .lg.fixed i{background:var(--muted)}
+  .lg.elastic i{background:var(--pass)}
+
+  .bars{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;align-items:end;height:196px}
+
+  .barcol{position:relative;height:100%;display:flex;align-items:flex-end}
+
+  .bar{
+    width:100%;background:var(--sky);border-radius:2px 2px 0 0;
+    transform-origin:bottom;animation:grow .7s cubic-bezier(.22,.61,.36,1) backwards;
+  }
+  .bar.over{background:var(--fail)}
+
+  @keyframes grow{from{transform:scaleY(0)}}
+  @media (prefers-reduced-motion:reduce){.bar{animation:none}}
+
+  .line-fixed,.line-elastic{position:absolute;left:-3px;right:-3px;height:2px}
+  .line-fixed{background:var(--muted)}
+  .line-elastic{background:var(--pass)}
+
+  .chart-x{
+    display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;margin-top:11px;
+    font-family:var(--mono);font-size:10px;font-weight:500;color:var(--faint);text-align:center;
+  }
+  .chart-x span.hot{color:var(--fail);font-weight:700}
+
+  .wave-note{display:grid;gap:16px}
+  .wave-note h3{font-size:clamp(19px,2.3vw,26px)}
+  .wave-note p{font-size:14.5px;color:var(--muted);line-height:1.68}
+
+  .quote{
+    border-left:3px solid var(--fail);padding:13px 0 13px 17px;
+    font-size:14px;color:var(--text-2);line-height:1.6;font-style:italic;
+  }
+  .quote cite{
+    display:block;margin-top:9px;font-style:normal;
+    font-family:var(--mono);font-size:10.5px;font-weight:600;
+    letter-spacing:0.1em;text-transform:uppercase;color:var(--fail);
+  }
+
+  /* ---------- coverage ---------- */
+
+  .cover{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+
+  .cv{background:var(--surface);padding:22px 20px;display:grid;gap:10px;align-content:start}
+
+  .cv-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .cv h3{font-size:14px;letter-spacing:-0.005em}
+  .cv p{font-size:13px;color:var(--muted);line-height:1.56}
+
+  .badge{
+    font-family:var(--mono);font-size:9.5px;font-weight:700;
+    letter-spacing:0.12em;text-transform:uppercase;
+    padding:5px 9px;border-radius:3px;white-space:nowrap;
+  }
+  .badge.have{background:var(--pass-dim);color:var(--pass)}
+  .badge.gap{background:var(--fail-dim);color:var(--fail)}
+
+  /* ---------- proof ---------- */
+
+  .proof{
+    background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--gold);
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  }
+
+  .proof-l{padding:clamp(26px,3.5vw,40px)}
+  .proof-r{padding:clamp(26px,3.5vw,40px);background:var(--sunk);display:grid;gap:2px;align-content:center}
+
+  .proof h3{font-size:clamp(21px,2.7vw,30px);margin-bottom:16px}
+  .proof p{font-size:14.5px;color:var(--muted);line-height:1.68}
+  .proof p + p{margin-top:14px}
+
+  .prow{
+    display:grid;grid-template-columns:auto 1fr;gap:15px;
+    padding-block:12px;border-bottom:1px solid var(--line-soft);
+    font-size:13.5px;color:var(--text-2);line-height:1.56;
+  }
+  .prow:last-child{border-bottom:0}
+
+  .prow b{
+    font-family:var(--mono);font-size:10px;font-weight:700;
+    letter-spacing:0.13em;text-transform:uppercase;color:var(--gold);
+    width:96px;padding-top:3px;
+  }
+
+  /* ---------- answers ---------- */
+
+  .ans{display:grid;gap:10px}
+
+  details{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--line)}
+  details[open]{border-left-color:var(--sky)}
+
+  summary{
+    list-style:none;cursor:pointer;padding:18px 20px;
+    display:flex;align-items:flex-start;gap:15px;
+    font-size:14.5px;font-weight:700;color:var(--text);letter-spacing:-0.005em;line-height:1.4;
+  }
+  summary::-webkit-details-marker{display:none}
+
+  .qn{
+    font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.1em;
+    color:var(--sky);flex:none;padding-top:3px;
+  }
+
+  details > p{padding:0 20px 20px 56px;font-size:14px;color:var(--muted);line-height:1.72;max-width:74ch}
+  details > p em{font-style:normal;color:var(--text-2);font-weight:500}
+
+  /* ---------- close ---------- */
+
+  .close-band{border-top:1px solid var(--line);background:var(--sunk)}
+
+  .close-in{display:grid;gap:20px;max-width:70ch}
+  .close-in h2{font-size:clamp(24px,3.4vw,38px)}
+  .close-in p{color:var(--muted);font-size:15px;line-height:1.7}
+
+  footer.bw{
+    border-top:1px solid var(--line);padding-block:26px 34px;
+    font-family:var(--mono);font-size:10.5px;font-weight:500;
+    letter-spacing:0.1em;text-transform:uppercase;color:var(--faint);
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+
+  /* ---------- reveal ---------- */
+
+  .rise{opacity:1;transform:none}
+
+  @media (prefers-reduced-motion:no-preference){
+    .js .rise{
+      opacity:0;transform:translateY(14px);
+      transition:opacity .65s cubic-bezier(.22,.61,.36,1),transform .65s cubic-bezier(.22,.61,.36,1);
+    }
+    .js .rise.in{opacity:1;transform:none}
+  }
+
+  /* ---------- responsive ---------- */
+
+  @media (max-width:980px){
+    .sec-head{grid-template-columns:1fr}
+    .math{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .pains{grid-template-columns:1fr 1fr}
+    .console{grid-template-columns:1fr}
+    .con-left{border-right:0;border-bottom:1px solid var(--line)}
+    .waves{grid-template-columns:1fr}
+    .cover{grid-template-columns:1fr 1fr}
+    .proof{grid-template-columns:1fr}
+  }
+
+  @media (max-width:620px){
+    .math{grid-template-columns:1fr}
+    .pains{grid-template-columns:1fr}
+    .cover{grid-template-columns:1fr}
+    .bars{height:156px;gap:4px}
+    .chart-x{gap:4px;font-size:9px}
+    .hero-actions .btn{flex:1}
+    details > p{padding-left:20px}
+    .prow{grid-template-columns:1fr;gap:5px}
+    .prow b{width:auto}
+  }
+</style>
+</head>
+<body>
+
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <span class="mark"><i></i>CrewNexa for Business Warriors</span>
+    <button class="btn btn-sm" type="button" data-goto="console">Run the demo</button>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow"><span class="label">Prepared for Jarrod Harman</span></div>
+      <h1>Two hundred and fifty clients.<br><b>Sixty jobs a day.</b><br>One inbox.</h1>
+      <p class="hero-lede">
+        Your care plan promises every client four edits and one new page every month. At the
+        client count you publish, that is roughly twelve hundred and fifty jobs a month landing
+        as email. This page is not a proposal. It is the thing that handles them, running live,
+        built entirely on figures you publish yourself.
+      </p>
+      <div class="hero-actions">
+        <button class="btn" type="button" data-goto="console">Run a real request</button>
+        <button class="btn btn-ghost" type="button" data-goto="proof">See a finished build</button>
+      </div>
+
+      <div class="math rise">
+        <div class="mcell src">
+          <span class="mval">250+</span>
+          <p class="mkey">Clients on the salon brand</p>
+          <span class="msrc">Source, growasalon.com</span>
+        </div>
+        <div class="mcell src">
+          <span class="mval">4 + 1</span>
+          <p class="mkey">Edits and one new page, per client, every month</p>
+          <span class="msrc">Care plan, 197 per month</span>
+        </div>
+        <div class="mcell alarm">
+          <span class="mval" id="countJobs">1,250</span>
+          <p class="mkey">Jobs a month that must be delivered by hand</p>
+          <span class="msrc">250 times 5</span>
+        </div>
+        <div class="mcell alarm2">
+          <span class="mval" id="countDay">60</span>
+          <p class="mkey">Jobs every working day, before a single new site is built</p>
+          <span class="msrc">Across 21 working days</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="pain">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div>
+          <div class="eyebrow"><span class="label fail">Read off your own pages</span></div>
+          <h2>Six things your own numbers say out loud.</h2>
+        </div>
+        <p>
+          Every one of these comes off businesswarriors.global or growasalon.com, the pricing page,
+          the care plan and the exclusions list. Each has a fix on this page, not a promise.
+        </p>
+      </div>
+
+      <div class="pains rise">
+        <article class="pain">
+          <span class="pain-n">Pain 01</span>
+          <h3>Delivery scales only by hiring</h3>
+          <p>Twelve hundred and fifty jobs a month arriving as email, each one read, understood, built and checked by a person.</p>
+          <div class="pain-fix"><b>Fixed below</b><span>The console turns a plain email into a built and checked change without a person reading it first.</span></div>
+        </article>
+
+        <article class="pain">
+          <span class="pain-n">Pain 02</span>
+          <h3>The work arrives in waves</h3>
+          <p>Twelve hundred and fifty jobs never arrive evenly. Launch weeks and seasonal pushes stack, then a fortnight goes quiet. Headcount cannot follow that curve.</p>
+          <div class="pain-fix"><b>Fixed below</b><span>Capacity that sits at zero in a quiet week and absorbs a spike without a hire.</span></div>
+        </article>
+
+        <article class="pain">
+          <span class="pain-n">Pain 03</span>
+          <h3>Quality has cost you before</h3>
+          <p>At sixty changes a day the thing that breaks is not the building. It is the checking. One missed alt text or a stale price on a live page is a call you have to take.</p>
+          <div class="pain-fix"><b>Fixed below</b><span>A gate that runs on every change and blocks the publish, visible in the console.</span></div>
+        </article>
+
+        <article class="pain">
+          <span class="pain-n">Pain 04</span>
+          <h3>AI build with nobody to run it</h3>
+          <p>You have run on agent infrastructure since 2021 and publish a 47 percent output gain. That gain sits inside your own operation. It has not been pushed out across the client base yet.</p>
+          <div class="pain-fix"><b>Fixed below</b><span>Generation is the second stage of the console and the copy it writes is shown.</span></div>
+        </article>
+
+        <article class="pain">
+          <span class="pain-n">Pain 05</span>
+          <h3>Nine platforms, one queue</h3>
+          <p>Your own builder plus every platform your inherited clients already sit on. WordPress, Shopify, Wix, Squarespace, Weebly, Divi, Elementor, WooCommerce and Go High Level.</p>
+          <div class="pain-fix"><b>Fixed below</b><span>Coverage table further down, including your own proprietary builder.</span></div>
+        </article>
+
+        <article class="pain">
+          <span class="pain-n">Pain 06</span>
+          <h3>Revenue you send away</h3>
+          <p>Your flat fee excludes ecommerce, member portals, custom web apps and multi location architecture. Those enquiries arrive anyway.</p>
+          <div class="pain-fix"><b>Fixed below</b><span>All four marked as covered in the coverage table, quoted as build work rather than turned down.</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="console" style="background:var(--sunk);border-block:1px solid var(--line)">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div>
+          <div class="eyebrow"><span class="label">Pain 01, 03 and 04</span></div>
+          <h2>A client emails. Watch what happens next.</h2>
+        </div>
+        <p>
+          Pick one of the three requests. These are the kind that arrive against a care plan every
+          day. Press run and watch the whole path, generation through to publish, with the quality
+          gate in the middle where it belongs. The second one fails on purpose.
+        </p>
+      </div>
+
+      <div class="console rise">
+        <div class="con-left">
+          <div class="con-title">Inbox, unread</div>
+
+          <button class="req on" data-i="0" type="button">
+            <span class="req-from">Bella Skin Studio, Subiaco</span>
+            <span class="req-txt">Hi, can you change our Thursday hours to 10 til 7 and add lip filler to the treatment list please</span>
+            <span class="req-tag">Care plan edit, 2 of 4 used</span>
+          </button>
+
+          <button class="req" data-i="1" type="button">
+            <span class="req-from">Lumen Laser, Joondalup</span>
+            <span class="req-txt">We have opened a second clinic in Joondalup. Need a page for it before the ads go live Monday</span>
+            <span class="req-tag">Monthly new page</span>
+          </button>
+
+          <button class="req" data-i="2" type="button">
+            <span class="req-from">Ardent Skin, Fremantle</span>
+            <span class="req-txt">Our new pricing starts Monday. Anti wrinkle goes to 13 per unit and the peel course drops to 4 sessions</span>
+            <span class="req-tag">Care plan edit, 4 of 4 used</span>
+          </button>
+
+          <div class="run-row">
+            <button class="btn" id="runBtn" type="button">Run request</button>
+            <span class="run-note" id="runNote">Ready</span>
+          </div>
+        </div>
+
+        <div class="con-right">
+          <div class="con-title">Pipeline</div>
+
+          <div class="stages" id="stages">
+            <div class="stage" data-s="0"><span class="dot"></span><span class="stage-n">Read and classify</span><span class="stage-t" data-t>waiting</span></div>
+            <div class="stage" data-s="1"><span class="dot"></span><span class="stage-n">Generate the change</span><span class="stage-t" data-t>waiting</span></div>
+            <div class="stage" data-s="2"><span class="dot"></span><span class="stage-n">Quality gate</span><span class="stage-t" data-t>waiting</span></div>
+            <div class="stage" data-s="3"><span class="dot"></span><span class="stage-n">Staged preview to client</span><span class="stage-t" data-t>waiting</span></div>
+            <div class="stage" data-s="4"><span class="dot"></span><span class="stage-n">Publish and log</span><span class="stage-t" data-t>waiting</span></div>
+          </div>
+
+          <div class="qa-box">
+            <div class="con-title" style="margin-bottom:13px">Quality gate</div>
+            <div class="qa-list" id="qaList">
+              <span class="qa-empty">Idle. Nothing publishes until this passes.</span>
+            </div>
+          </div>
+
+          <div class="out" id="out">
+            <div class="out-h" id="outH">Result</div>
+            <p id="outP"></p>
+            <div class="out-meta" id="outM"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="waves">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div>
+          <div class="eyebrow"><span class="label fail">Pain 02</span></div>
+          <h2>The reason good people keep leaving.</h2>
+        </div>
+        <p>
+          A fixed hire is a flat line drawn across a demand curve that is anything but flat. In a
+          quiet week you carry cost you are not using. In a spike week the work is late and the
+          client hears about it. Neither is a people problem.
+        </p>
+      </div>
+
+      <div class="waves rise">
+        <div class="chart">
+          <div class="chart-head">
+            <span class="con-title" style="margin:0">Twelve weeks of delivery load</span>
+            <div class="legend">
+              <span class="lg demand"><i></i>Within capacity</span>
+              <span class="lg over"><i></i>Late</span>
+              <span class="lg fixed"><i></i>Fixed hire</span>
+              <span class="lg elastic"><i></i>Elastic</span>
+            </div>
+          </div>
+
+          <div class="bars" id="bars"></div>
+          <div class="chart-x" id="barsX"></div>
+        </div>
+
+        <div class="wave-note">
+          <h3>Pay for the peak, not the average.</h3>
+          <p>
+            The grey line is what a single fixed hire absorbs. Every red bar above it is work that
+            went out late. Everything below it is paid for and idle. The green line follows the
+            work instead of the calendar, which is the only arrangement that survives a week like
+            seven.
+          </p>
+          <p>
+            The only arrangement that survives week seven is one where capacity is bought by the
+            job rather than by the month. Quiet fortnight, you pay for a quiet fortnight. Launch
+            week, the queue still clears on the same day it arrived.
+          </p>
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="coverage" style="background:var(--sunk);border-block:1px solid var(--line)">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div>
+          <div class="eyebrow"><span class="label fail">Pain 05 and 06</span></div>
+          <h2>Every platform your clients sit on, and the four you turn away.</h2>
+        </div>
+        <p>
+          Green is covered. Red is what your own package page lists as excluded, which means the
+          enquiry still arrives and the answer is currently a custom quote or a no.
+        </p>
+      </div>
+
+      <div class="cover rise">
+        <div class="cv"><div class="cv-top"><h3>WordPress and WooCommerce</h3><span class="badge have">Covered</span></div><p>Builds, migrations, theme and plugin work, Wordfence and Cloudflare, staged updates.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Shopify</h3><span class="badge have">Covered</span></div><p>Theme development, Liquid, app integration, checkout and speed work.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Go High Level</h3><span class="badge have">Covered</span></div><p>Funnels, forms, calendars, pipelines, webhooks and site build inside the platform.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Wix, Squarespace, Weebly</h3><span class="badge have">Covered</span></div><p>Inherited client sites maintained or migrated off without losing rankings.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Divi and Elementor</h3><span class="badge have">Covered</span></div><p>Existing builds maintained, page speed recovered where the builder is the cause.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Your proprietary builder</h3><span class="badge have">Covered</span></div><p>Hand coded output, no CMS for the client to touch, which is how your package already works.</p></div>
+
+        <div class="cv"><div class="cv-top"><h3>Ecommerce</h3><span class="badge gap">You exclude</span></div><p>Listed outside your flat fee. Product, cart, payment and shipping build.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Member portals</h3><span class="badge gap">You exclude</span></div><p>Login, gated content, subscription state and client areas.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Custom web apps</h3><span class="badge gap">You exclude</span></div><p>Booking engines, calculators, intake forms and anything with logic behind it.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Multi location</h3><span class="badge gap">You exclude</span></div><p>Franchise and multi site architecture with shared content and separate local pages.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Programmatic pages</h3><span class="badge have">Covered</span></div><p>Service by location at the scale your own site already runs, 60 plus suburbs and every state.</p></div>
+        <div class="cv"><div class="cv-top"><h3>Compliance for clinics</h3><span class="badge have">Covered</span></div><p>TGA prescription medicine rules and AHPRA advertising rules applied at build, not after.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="proof">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div>
+          <div class="eyebrow"><span class="label gold">The output</span></div>
+          <h2>And this is what comes out the other end.</h2>
+        </div>
+        <p>
+          A finished clinic homepage, built to the spec your own package publishes, in the
+          growasalon palette and typeface so it sits inside your brand rather than beside it.
+          The clinic is invented. Everything else is real.
+        </p>
+      </div>
+
+      <div class="proof rise">
+        <div class="proof-l">
+          <h3>The part worth two minutes</h3>
+          <p>
+            Anti wrinkle and filler products are prescription only medicines. Advertising them to
+            the public is prohibited under the Therapeutic Goods Act, so that page names no brand
+            anywhere. AHPRA does not permit testimonials in advertising for regulated health
+            services, so it carries none, and clinical protocol does the trust work instead.
+          </p>
+          <p>
+            Every clinic client you take runs into both rules. Most find out after the site is
+            live. Building it in from the start costs nothing and removes a category of problem
+            you should never have to hear about.
+          </p>
+          <div style="margin-top:26px">
+            <a class="btn" href="./clinic.html" target="_blank" rel="noopener">Open the finished page</a>
+          </div>
+        </div>
+        <div class="proof-r">
+          <div class="prow"><b>Palette</b><span>Taken from growasalon.com. Your gold measures 2.8 to 1 on white, which fails accessibility at small sizes, so two darker values were derived and the brand gold kept for rules and hovers.</span></div>
+          <div class="prow"><b>Structure</b><span>MedicalClinic schema with hours, geo and service area. Semantic landmarks, visible focus, reduced motion honoured.</span></div>
+          <div class="prow"><b>Weight</b><span>One file. No external scripts, no page builder, no plugin surface to patch later.</span></div>
+          <div class="prow"><b>Copy</b><span>Written to the brief, not filled in. Chair time, downtime, course length and how long results hold, because that is what decides a booking.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="answers" style="background:var(--sunk);border-block:1px solid var(--line)">
+    <div class="wrap">
+      <div class="sec-head rise">
+        <div>
+          <div class="eyebrow"><span class="label">Straight answers</span></div>
+          <h2>The four things worth knowing before a call.</h2>
+        </div>
+        <p>
+          No capability list and no slide deck. These are the answers that actually decide whether
+          a delivery partner is worth a conversation.
+        </p>
+      </div>
+
+      <div class="ans rise">
+        <details>
+          <summary><span class="qn">01</span>Who exactly is on the other end</summary>
+          <p>CrewNexa, an agency rather than one person, and we are saying that up front rather than letting you find out later. It is the reason the capacity above flexes with the load instead of holding a seat, and the reason nine platforms sit under one contact instead of nine separate hires. <em>A named lead runs your queue, with cover behind them, so nothing stalls when one person is away.</em></p>
+        </details>
+
+        <details>
+          <summary><span class="qn">02</span>Security and hosting maintenance</summary>
+          <p>Wordfence for the application firewall, malware scanning and login hardening. Cloudflare in front for DNS, TLS, caching, WAF rules and rate limiting. Hosting with daily off site backups, isolated staging and PHP version discipline. Core, theme and plugin updates go to staging and get tested before production, because most WordPress incidents arrive through an unpatched plugin rather than a breached password. <em>A restore is rehearsed before it is needed, not during.</em></p>
+        </details>
+
+        <details>
+          <summary><span class="qn">03</span>Where AI sits in the build</summary>
+          <p>AI does the volume work, which is exactly where your margin lives. First draft copy against a brief, page variants across service and location, schema and alt text generation, internal link mapping, content refresh cycles and the classification step in the console above. It does not decide layout and it does not get the final word on anything a regulator reads. <em>The compliance decisions on the clinic page were made by a person and checked twice.</em></p>
+        </details>
+
+        <details>
+          <summary><span class="qn">04</span>Testing, and how QA improves</summary>
+          <p>A gate, not a habit. Nothing publishes until it passes, and you saw the list run above. Rendering at 360, 768, 1024 and 1440. Keyboard only navigation through every control. Contrast measured rather than eyeballed, which is how the contrast problem in your own palette was caught. Forms tested empty, invalid and submitted twice. Links and anchors resolved. Schema validated. Console clean. Reduced motion honoured. <em>Improving it means every issue a client reports becomes a new line on the list, so the same thing cannot reach them twice.</em></p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec close-band">
+    <div class="wrap close-in">
+      <div class="eyebrow"><span class="label">Where this leaves us</span></div>
+      <h2>We built it first, because that is the only part of any pitch that proves anything.</h2>
+      <p>
+        Nothing here was asked for and nothing here is invoiced. Every figure on this page came off
+        a page you publish yourself, and the one correction we made to your brand was a contrast
+        fault we would have had to fix anyway.
+      </p>
+      <p>
+        If the standard looks right, send a real brief and the next one gets built the same way,
+        before any agreement is signed.
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
+        <a class="btn" href="mailto:talha@crewnexa.net?subject=Business%20Warriors">Reply to CrewNexa</a>
+        <button class="btn btn-ghost" type="button" data-goto="console">Run the console again</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <footer class="bw">
+      <span>CrewNexa, prepared for Business Warriors</span>
+      <span>Figures sourced from businesswarriors.global and growasalon.com</span>
+    </footer>
+  </div>
+
+</main>
+
+<script>
+  document.documentElement.classList.add('js');
+
+  (function(){
+    var items = document.querySelectorAll('.rise');
+    var showAll = function(){ items.forEach(function(el){ el.classList.add('in'); }); };
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      showAll();
+      return;
+    }
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+    }, { rootMargin:'0px 0px -8% 0px', threshold:0.05 });
+    items.forEach(function(el){ io.observe(el); });
+    // safety net, nothing on this page is allowed to stay invisible
+    setTimeout(showAll, 2600);
+  })();
+
+  /* waves chart */
+  (function(){
+    var load = [38,45,41,62,49,44,96,71,52,47,58,43];
+    var fixed = 55, max = 100;
+    var bars = document.getElementById('bars');
+    var xs = document.getElementById('barsX');
+    load.forEach(function(v,i){
+      var col = document.createElement('div');
+      col.className = 'barcol';
+      var b = document.createElement('div');
+      b.className = 'bar' + (v > fixed ? ' over' : '');
+      b.style.height = (v/max*100) + '%';
+      b.style.animationDelay = (i*55) + 'ms';
+      col.appendChild(b);
+      var lf = document.createElement('span');
+      lf.className = 'line-fixed';
+      lf.style.bottom = (fixed/max*100) + '%';
+      col.appendChild(lf);
+      var le = document.createElement('span');
+      le.className = 'line-elastic';
+      le.style.bottom = (v/max*100) + '%';
+      col.appendChild(le);
+      bars.appendChild(col);
+      var x = document.createElement('span');
+      x.textContent = 'W' + (i+1);
+      if (v > fixed) x.className = 'hot';
+      xs.appendChild(x);
+    });
+  })();
+
+  /* console */
+  (function(){
+    var DATA = [
+      {
+        classify:'Care plan edit. Two changes. Opening hours and one service addition.',
+        gen:'Thursday updated to 10:00 to 19:00 in the hours block and in the LocalBusiness schema. Lip filler added to the treatment list with chair time, downtime and course written to match the existing entries. No brand named, because the product is prescription only.',
+        checks:[
+          ['Schema hours match page hours','pass','openingHours'],
+          ['Google Business Profile flagged for same edit','pass','queued'],
+          ['New service copy names no prescription brand','pass','TGA clear'],
+          ['Contrast on new list row','pass','7.1 to 1'],
+          ['Mobile render 360 to 1440','pass','4 widths'],
+          ['Internal links resolve','pass','0 broken']
+        ],
+        out:['Staged and sent for approval','Client sees a preview link before anything goes live. Approved changes publish on click and the edit is logged against two of their four for the month.','p'],
+        meta:[['Human minutes','0'],['Elapsed','1m 48s'],['Edits left','2 of 4']]
+      },
+      {
+        classify:'Monthly new page. Second location. Deadline named by the client.',
+        gen:'Joondalup location page generated on the existing location template. Suburb, address, hours, parking and staff pulled from the brief. Copy written against the nine location pages already live so tone matches. Schema, internal links from the locations index and a Google Business Profile entry drafted.',
+        checks:[
+          ['Duplicate content against 9 live location pages','pass','11% overlap'],
+          ['Canonical and internal links','pass','resolved'],
+          ['LocalBusiness schema, second address','pass','valid'],
+          ['Suburb named in H1, title and meta','pass','3 of 3'],
+          ['Page weight','pass','under 90kb'],
+          ['Landing page ready before ad launch','pass','Monday'],
+          ['Alt text on every image','fail','2 missing']
+        ],
+        out:['Blocked at the gate, then cleared','Two images went through without alt text. The gate refused to publish, alt text was generated and the check reran. This is the step that decides whether the client finds the fault or you do.','p'],
+        meta:[['Human minutes','6'],['Elapsed','9m 12s'],['Blocked once','yes']]
+      },
+      {
+        classify:'Care plan edit. Pricing change across two treatments. Dated.',
+        gen:'Anti wrinkle per unit price and peel course length updated on the treatment page, the pricing table and the two service pages that quote them. Change scheduled for Monday rather than published now, so the old price does not disappear before the date the client gave.',
+        checks:[
+          ['All pages quoting the old price found','pass','4 pages'],
+          ['Schema offer values updated','pass','2 offers'],
+          ['Scheduled for the stated date','pass','Mon 00:01'],
+          ['Old price removed nowhere before the date','pass','held'],
+          ['Numeric formatting consistent','pass','tabular'],
+          ['Fourth edit of the month flagged to account','pass','notified']
+        ],
+        out:['Scheduled, not published','The client said Monday, so it goes Monday. Their fourth edit of the month is used, which the account side now knows before the client asks for a fifth.','p'],
+        meta:[['Human minutes','0'],['Elapsed','2m 31s'],['Edits left','0 of 4']]
+      }
+    ];
+
+    var STAGES = ['Read and classify','Generate the change','Quality gate','Staged preview to client','Publish and log'];
+    var reqs = document.querySelectorAll('.req');
+    var runBtn = document.getElementById('runBtn');
+    var runNote = document.getElementById('runNote');
+    var stages = document.querySelectorAll('.stage');
+    var qaList = document.getElementById('qaList');
+    var out = document.getElementById('out');
+    var outH = document.getElementById('outH');
+    var outP = document.getElementById('outP');
+    var outM = document.getElementById('outM');
+
+    var active = 0, running = false, timers = [];
+
+    reqs.forEach(function(r){
+      r.addEventListener('click', function(){
+        if (running) return;
+        reqs.forEach(function(x){ x.classList.remove('on'); });
+        r.classList.add('on');
+        active = parseInt(r.dataset.i, 10);
+        reset();
+      });
+    });
+
+    function note(t, cls){
+      runNote.textContent = t;
+      runNote.className = 'run-note' + (cls ? ' ' + cls : '');
+    }
+
+    function reset(){
+      timers.forEach(clearTimeout); timers = [];
+      stages.forEach(function(s){
+        s.classList.remove('live','done');
+        s.querySelector('[data-t]').textContent = 'waiting';
+      });
+      qaList.innerHTML = '<span class="qa-empty">Idle. Nothing publishes until this passes.</span>';
+      out.className = 'out';
+      note('Ready');
+    }
+
+    function at(fn, ms){ timers.push(setTimeout(fn, ms)); }
+
+    function show(h, p, cls){
+      outH.textContent = h;
+      outP.textContent = p;
+      outM.innerHTML = '';
+      out.className = 'out show' + (cls ? ' ' + cls : '');
+    }
+
+    runBtn.addEventListener('click', function(){
+      if (running) return;
+      reset();
+      running = true;
+      runBtn.textContent = 'Running';
+      var d = DATA[active];
+      var t = 0, step = 800;
+
+      [0,1].forEach(function(i){
+        at(function(){
+          stages[i].classList.add('live');
+          stages[i].querySelector('[data-t]').textContent = 'running';
+          note(STAGES[i], 'go');
+        }, t);
+        t += step;
+        at(function(){
+          stages[i].classList.remove('live');
+          stages[i].classList.add('done');
+          stages[i].querySelector('[data-t]').textContent = 'done';
+          if (i === 0) show('Classified', d.classify);
+          if (i === 1) show('Generated by AI', d.gen, 'v');
+        }, t);
+      });
+
+      at(function(){
+        stages[2].classList.add('live');
+        stages[2].querySelector('[data-t]').textContent = 'running';
+        note('Quality gate', 'go');
+        qaList.innerHTML = '';
+      }, t);
+
+      var ct = t + 280;
+      d.checks.forEach(function(c, i){
+        at(function(){
+          var bad = c[1] === 'fail';
+          var row = document.createElement('div');
+          row.className = 'qa-row ' + (bad ? 'bad' : 'good');
+          row.innerHTML =
+            '<span class="tick ' + (bad ? 'no' : 'ok') + '">' + (bad ? '&#33;' : '&#10003;') + '</span>' +
+            '<span>' + c[0] + '</span>' +
+            '<span class="qa-v">' + c[2] + '</span>';
+          qaList.appendChild(row);
+          if (bad) note('Blocked', 'bad');
+        }, ct + i * 240);
+      });
+
+      t = ct + d.checks.length * 240 + 440;
+      var failed = d.checks.some(function(c){ return c[1] === 'fail'; });
+
+      if (failed){
+        at(function(){
+          note('Repairing, will not publish', 'bad');
+          var row = document.createElement('div');
+          row.className = 'qa-row good';
+          row.innerHTML = '<span class="tick ok">&#10003;</span><span>Alt text generated, check reran</span><span class="qa-v">cleared</span>';
+          qaList.appendChild(row);
+        }, t);
+        t += 980;
+      }
+
+      at(function(){
+        stages[2].classList.remove('live');
+        stages[2].classList.add('done');
+        stages[2].querySelector('[data-t]').textContent = failed ? 'passed on retry' : 'passed';
+        note('Gate passed', 'ok');
+      }, t);
+
+      [3,4].forEach(function(i){
+        t += 240;
+        at(function(){
+          stages[i].classList.add('live');
+          stages[i].querySelector('[data-t]').textContent = 'running';
+          note(STAGES[i], 'go');
+        }, t);
+        t += step;
+        at(function(){
+          stages[i].classList.remove('live');
+          stages[i].classList.add('done');
+          stages[i].querySelector('[data-t]').textContent = 'done';
+        }, t);
+      });
+
+      at(function(){
+        outH.textContent = d.out[0];
+        outP.textContent = d.out[1];
+        outM.innerHTML = d.meta.map(function(m){
+          return '<span>' + m[0] + ' <b>' + m[1] + '</b></span>';
+        }).join('');
+        out.className = 'out show ' + d.out[2];
+        note('Complete', 'ok');
+        runBtn.textContent = 'Run again';
+        running = false;
+      }, t + 280);
+    });
+  })();
+
+  /* internal navigation uses buttons, never anchors, so nothing can navigate away */
+  document.querySelectorAll('[data-goto]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var t = document.getElementById(b.dataset.goto);
+      if (t) t.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  });
+</script>
+
+</body>
+</html>
